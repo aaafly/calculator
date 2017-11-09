@@ -7,8 +7,12 @@ function StringEquation(str) {
   } else {
     this.str = this.sanitizeParenthesis(this.str);
     this.str = this.sanitizeDoubleNegation(this.str);
-    console.log('str', this.str)
-    console.log('eval >>>>>> ', eval(this.str));
+    console.log('str', this.str);
+    try {
+      console.log('eval >>>>>> ', eval(this.str));
+    } catch (err) {
+      console.log('eval failed');
+    }
     this.levelDeep = this.getEquationParathensisMaxDeepness(this.str);
 
     while (this.levelDeep > 1) {
@@ -112,13 +116,10 @@ StringEquation.prototype.calculateAndReplace = function (str, pattern, type) {
 }
 
 StringEquation.prototype.calculateOneLevelString = function (str) {
-  var strEval = eval(str);
   str = this.sanitizeDoubleOperators(str);
-  str = this.calculateAndReplace(str, /[0-9.]+\*-?[0-9.]+/, '*')
+  str = this.calculateAndReplace(str, /[0-9.]+\*-?[0-9.]+/, '*');
+  str = this.calculateAndReplace(str, /[0-9.]+\/[0-9.]+/, '/');
 
-  str = this.calculateAndReplace(str, /[0-9.]+\/[0-9.]+/, '/')
-
-  //
   var sign = str[0] === '-' ? '-' : '+';
   if (sign === '-') {
     str = str.slice(1);

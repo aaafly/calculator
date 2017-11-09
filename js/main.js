@@ -56,8 +56,15 @@ $(".entry").on('click', function () {
 });
 
 $("#equals").on('click', function () {
-  var stringEquation = new StringEquation(input);
-  input = stringEquation.answer
-  indicatorElem.html(input);
+  try {
+    var stringEquation = new StringEquation(input);
+    input = stringEquation.answer
+    indicatorElem.html(input);
+  } catch (err) {
+    console.log('ERR', err);
+    input = '0';
+    indicatorElem.html('Err');
+  }
+
   showingAnswer = true;
 });
