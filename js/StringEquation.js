@@ -54,7 +54,7 @@ StringEquation.prototype.appendEntry = function (char) {
   }
 
   // prevent leading zero
-  if (this.str === '0' && char.match(/[0-9(]/)) {
+  if (this.str === '0' && char.match(/[0-9(\-]/)) {
     this.str = '';
   }
 
