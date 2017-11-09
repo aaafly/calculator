@@ -9,6 +9,8 @@ function InterfaceManager(stringEquation) {
   $(document).keypress(function (e) {
     if (['Enter', '='].indexOf(e.key) !== -1) {
       _this.calculate();
+    } else if (e.key === 'c') {
+      _this.reset();
     } else {
       _this.addChar(e.key);
     }
@@ -25,11 +27,15 @@ function InterfaceManager(stringEquation) {
   });
 
   $("#reset").on('click', function () {
-    _this.stringEquation.reset();
-    _this.indicatorElem.html('0');
-    _this.showingAnswer = false;
+    _this.reset();
   });
 }
+
+InterfaceManager.prototype.reset = function () {
+  this.stringEquation.reset();
+  this.indicatorElem.html('0');
+  this.showingAnswer = false;
+};
 
 InterfaceManager.prototype.calculate = function () {
   var res = this.stringEquation.calculate();

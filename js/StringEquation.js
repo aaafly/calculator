@@ -16,6 +16,7 @@ StringEquation.prototype.calculate = function () {
   try {
     this.validateEquation();
     this.sanitizeParenthesis();
+    console.log(this.str);
     this.sanitizeDoubleNegation();
     this.testEval();
     this.setDeepness();
@@ -72,7 +73,7 @@ StringEquation.prototype.sanitizeDoubleNegation = function () {
 };
 
 StringEquation.prototype.sanitizeParenthesis = function () {
-  this.str = this.str.replace(/(\d)\(/g, function replacer(match, digit) {
+  this.str = this.str.replace(/([\d|)])\(/g, function replacer(match, digit) {
     return digit + '*(';
   });
 };
