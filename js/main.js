@@ -12,14 +12,24 @@ $("#reset").on('click', function () {
 $(".entry").on('click', function () {
   var typed = $(this).html();
 
+  //  start new or chain from answer
+
   if (
     input === 'Err' ||
-    (showingAnswer && (typed.match(/[0-9]/) || []).length)
+    (showingAnswer && typed.match(/[0-9.]/))
   ) {
-    input = typed;
+    input = '0' + typed;
   } else {
     input += typed;
   }
+
+  // remove un-needed leading zero
+
+  if (input.match(/^0+[\d]/)) {
+    input = input.replace(/^0+/, '');
+  }
+
+
 
   indicatorElem.html(input);
   showingAnswer = false;
