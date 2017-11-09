@@ -16,7 +16,7 @@ StringEquation.prototype.calculate = function () {
   try {
     this.validateEquation();
     this.sanitizeParenthesis();
-    this.sanitizeDoubleNegation();
+    this.str = this.sanitizeDoubleNegation(this.str);
     this.testEval();
     this.setDeepness();
 
@@ -65,10 +65,37 @@ StringEquation.prototype.validateEquation = function () {
   if ((this.str.match(/\(/g) || []).length !== (this.str.match(/\)/g) || []).length) {
     throw {msg: 'Unbalanced parenthesis'}
   }
+  if (!this.isBalanced(this.str)) {
+    throw {msg: 'Unbalanced parenthesis'}
+  }
 };
 
-StringEquation.prototype.sanitizeDoubleNegation = function () {
-  this.str = this.str.replace(/--/g, '+');
+// from web
+StringEquation.prototype.isBalanced = function (code) {
+  var length = code.length;
+  var bracket = [];
+  var matching = {
+    ')': '('
+  };
+
+  for (var i = 0; i < length; i++) {
+    var char = code.charAt(i);
+
+    switch (char) {
+      case '(':
+        bracket.push(char);
+        break;
+      case ')':
+        if (bracket.length && matching[char] !== bracket.pop())
+          return false;
+    }
+  }
+
+  return !bracket.length;
+}
+
+StringEquation.prototype.sanitizeDoubleNegation = function (str) {
+  return str.replace(/--/g, '+');
 };
 
 StringEquation.prototype.sanitizeParenthesis = function () {
@@ -153,10 +180,30 @@ StringEquation.prototype.calculateAndReplace = function (str, pattern, type) {
 };
 
 StringEquation.prototype.calculateFlatString = function (str) {
-  str = this.sanitizeDoubleOperators(str);
-  str = this.calculateAndReplace(str, /[0-9.]+\*-?[0-9.]+/, '*');
-  str = this.calculateAndReplace(str, /[0-9.]+\/[0-9.]+/, '/');
 
+  // Clean up.
+  str = this.sanitizeDoubleOperators(str);
+
+  // Take care of all multiplications.
+  str = this.calculateAndReplace(str, /[0-9.]+\*-?[0-9.]+/, '*');
+  if (str.indexOf('e+') !== -1) {
+    throw {msg: 'Out of range'};
+  }
+
+  // Take care of all divisions.
+  str = this.calculateAndReplace(str, /[0-9.]+\/[0-9.]+/, '/');
+  if (str.indexOf('e+') !== -1) {
+    throw {msg: 'Out of range'};
+  }
+
+  // Clean up.
+  str = this.sanitizeDoubleNegation(str);
+  if (str[0] === '+') {
+    str = str.slice(1);
+  }
+
+
+  // Prepare for additions & subtractions.
   var sign = str[0] === '-' ? '-' : '+';
   if (sign === '-') {
     str = str.slice(1);
@@ -164,6 +211,13 @@ StringEquation.prototype.calculateFlatString = function (str) {
   var typeMatch = str.match(/[\-+]/);
   var addPattern = /[0-9.]+\+[0-9.]+/;
   var subPattern = /[0-9.]+-[0-9.]+/;
+
+  // If no addition or subtraction. re-assign sign.
+  if (!typeMatch && sign === '-') {
+    return '-' + str;
+  }
+
+  // Do additions & subtractions.
   while (typeMatch) {
     var pattern = typeMatch[0] === '+' ? addPattern : subPattern;
     var match = str.match(pattern);
