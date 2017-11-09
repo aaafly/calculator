@@ -5,6 +5,7 @@ function StringEquation(str) {
     this.answer = 'Err';
   } else {
     this.str = this.sanitizeParenthesis(str);
+    this.str = this.sanitizeDoubleNegation(str);
     console.log('str', this.str)
     console.log('eval >>>>>> ', eval(this.str));
     this.levelDeep = this.getEquationParathensisMaxDeepness(this.str);
@@ -23,6 +24,10 @@ function StringEquation(str) {
 
 StringEquation.prototype.isEquationValid = function (str) {
   return (str.match(/\(/g) || []).length === (str.match(/\)/g) || []).length;
+}
+
+StringEquation.prototype.sanitizeDoubleNegation = function (str) {
+  return str.replace(/--/g, '+');
 }
 
 StringEquation.prototype.sanitizeParenthesis = function (str) {

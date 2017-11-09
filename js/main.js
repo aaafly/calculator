@@ -1,16 +1,28 @@
-var input = 0;
+var input = '0';
 var showingAnswer = false;
 // input = "111-1+1/1+(22/2-222(3*3(4+4)))+(11-99/1+(2+2+(3+3(4+4+4)+3)))";
 var indicatorElem = $("#result");
 
 $("#reset").on('click', function () {
-  input = 0;
-  indicatorElem.html(0);
+  input = '0';
+  indicatorElem.html('0');
   showingAnswer = false;
 });
 
 $(".entry").on('click', function () {
   var typed = $(this).html();
+
+  // prevent multiple multiplication/division together
+
+  if (['*', '+', '/'].indexOf(input.slice(-1)) !== -1 && ['*', '/', '+'].indexOf(typed) !== -1) {
+    return;
+  }
+
+  // prevent triple negation
+
+  if (input.slice(-2) === '--' && typed === '-') {
+    return;
+  }
 
   //  start new or chain from answer
 
@@ -28,8 +40,6 @@ $(".entry").on('click', function () {
   if (input.match(/^0+[\d]/)) {
     input = input.replace(/^0+/, '');
   }
-
-
 
   indicatorElem.html(input);
   showingAnswer = false;
