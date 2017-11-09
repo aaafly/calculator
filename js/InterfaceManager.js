@@ -43,6 +43,12 @@ InterfaceManager.prototype.calculate = function () {
     this.indicatorElem.html('Err. ' + res.err);
   } else {
     this.indicatorElem.html(res.result);
+    if (res.result === 'Infinity') {
+      this.stringEquation.reset();
+    } else if (res.result === 'NaN') {
+      this.indicatorElem.html('Err.');
+      this.stringEquation.reset();
+    }
   }
   this.showingAnswer = true;
 }

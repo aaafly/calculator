@@ -28,7 +28,7 @@ StringEquation.prototype.calculate = function () {
 
     return {result: this.str};
   } catch (err) {
-    return {err: err.msg || 'Err'}
+    return {err: err.msg || ' '}
   }
 };
 
