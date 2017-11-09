@@ -1,19 +1,28 @@
 function StringEquation(str) {
   console.log('str', str)
   this.answer = 0;
-  this.str = this.sanitizeParenthesis(str);
-  console.log('str', this.str)
-  console.log('eval >>>>>> ', eval(this.str));
-  this.levelDeep = this.getEquationParathensisMaxDeepness(this.str);
-
-  while (this.levelDeep > 1) {
-    this.getEquationsFromLevel(this.levelDeep);
+  if (!this.isEquationValid(str)) {
+    this.answer = 'Err';
+  } else {
+    this.str = this.sanitizeParenthesis(str);
+    console.log('str', this.str)
+    console.log('eval >>>>>> ', eval(this.str));
     this.levelDeep = this.getEquationParathensisMaxDeepness(this.str);
-    console.log('this.str', this.str);
+
+    while (this.levelDeep > 1) {
+      this.getEquationsFromLevel(this.levelDeep);
+      this.levelDeep = this.getEquationParathensisMaxDeepness(this.str);
+      console.log('this.str', this.str);
+    }
+
+    this.answer = this.calculateOneLevelString(this.str);
+    console.log('this.answer', this.answer);
   }
 
-  this.answer = this.calculateOneLevelString(this.str);
-  console.log('this.answer', this.answer);
+}
+
+StringEquation.prototype.isEquationValid = function (str) {
+  return (str.match(/\(/g) || []).length === (str.match(/\)/g) || []).length;
 }
 
 StringEquation.prototype.sanitizeParenthesis = function (str) {

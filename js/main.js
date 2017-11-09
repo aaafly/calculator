@@ -8,7 +8,12 @@ $("#reset").on('click', function () {
 });
 
 $(".entry").on('click', function () {
-  input += $(this).html();
+  if (input === 'Err') {
+    input = $(this).html()
+  } else {
+    input += $(this).html();
+  }
+
   indicatorElem.html(input);
 });
 
