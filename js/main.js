@@ -12,6 +12,12 @@ $("#reset").on('click', function () {
 $(".entry").on('click', function () {
   var typed = $(this).html();
 
+  // prevent starting with closing parenthesis
+
+  if (input === '0' && typed === ')') {
+    return;
+  }
+
   // prevent multiple multiplication/division together
 
   if (['*', '+', '/'].indexOf(input.slice(-1)) !== -1 && ['*', '/', '+'].indexOf(typed) !== -1) {
@@ -38,6 +44,10 @@ $(".entry").on('click', function () {
   // remove un-needed leading zero
 
   if (input.match(/^0+[\d]/)) {
+    input = input.replace(/^0+/, '');
+  }
+
+  if (input.match(/^0+\(/)) {
     input = input.replace(/^0+/, '');
   }
 

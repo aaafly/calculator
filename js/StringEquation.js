@@ -1,11 +1,12 @@
 function StringEquation(str) {
   console.log('str', str)
+  this.str = str;
   this.answer = 0;
-  if (!this.isEquationValid(str)) {
+  if (!this.isEquationValid(this.str)) {
     this.answer = 'Err';
   } else {
-    this.str = this.sanitizeParenthesis(str);
-    this.str = this.sanitizeDoubleNegation(str);
+    this.str = this.sanitizeParenthesis(this.str);
+    this.str = this.sanitizeDoubleNegation(this.str);
     console.log('str', this.str)
     console.log('eval >>>>>> ', eval(this.str));
     this.levelDeep = this.getEquationParathensisMaxDeepness(this.str);
