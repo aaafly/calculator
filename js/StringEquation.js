@@ -16,7 +16,6 @@ StringEquation.prototype.calculate = function () {
   try {
     this.validateEquation();
     this.sanitizeParenthesis();
-    console.log(this.str);
     this.sanitizeDoubleNegation();
     this.testEval();
     this.setDeepness();

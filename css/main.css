@@ -1,7 +1,25 @@
 body {
   font-family: 'Roboto', sans-serif;
+  padding: 0;
+  margin: 0;
 }
+
+header {
+  background-color: #ddd;
+  margin-bottom: 40px;
+  box-shadow: 0 0 15px #666;
+}
+
+header h1 {
+text-align: center;
+  margin: auto;
+  padding: 10px;
+  font-size: 30px;
+  font-weight: 100;
+}
+
 table {
+  margin: auto;
   border-collapse: collapse;
 }
 
@@ -12,6 +30,8 @@ td {
   text-align: center;
   height: 25px;
   width: 25px;
+  font-size: 24px;
+  font-weight: 200;
 }
 
 tr:first-child td {
@@ -26,6 +46,15 @@ tr:nth-child(2) td:nth-child(1),
 tr:nth-child(2) td:nth-child(2),
 tr:nth-child(2) td:nth-child(3) {
   background-color: #ddd;
+}
+
+tr:nth-child(2) td:nth-child(4),
+tr:nth-child(3) td:nth-child(4),
+tr:nth-child(4) td:nth-child(4),
+tr:nth-child(5) td:nth-child(4),
+tr:nth-child(6) td:nth-child(3) {
+  background-color: #ff9c00;
+  color: white;
 }
 
 
