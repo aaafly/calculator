@@ -23,6 +23,11 @@ table {
   border-collapse: collapse;
 }
 
+#result {
+  max-width: 180px;
+  overflow-wrap: break-word;
+}
+
 td {
   background-color: #fcfcfc;
   padding: 15px;
