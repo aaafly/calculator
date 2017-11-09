@@ -1,45 +1,81 @@
-function StringEquation(str) {
-  console.log('str', str)
-  this.str = str;
-  this.answer = 0;
-  if (!this.isEquationValid(this.str)) {
-    this.answer = 'Err';
-  } else {
-    this.str = this.sanitizeParenthesis(this.str);
-    this.str = this.sanitizeDoubleNegation(this.str);
-    console.log('str', this.str);
-    try {
-      console.log('eval >>>>>> ', eval(this.str));
-    } catch (err) {
-      console.log('eval failed');
-    }
-    this.levelDeep = this.getEquationParathensisMaxDeepness(this.str);
+function StringEquation() {
+  this.str = '0';
+  this.deepness = 1;
+}
 
-    while (this.levelDeep > 1) {
-      this.getEquationsFromLevel(this.levelDeep);
-      this.levelDeep = this.getEquationParathensisMaxDeepness(this.str);
-      console.log('this.str', this.str);
+// Only for test purposes.
+StringEquation.prototype.testEval = function () {
+  try {
+    console.log('eval >>>>>> ', eval(this.str));
+  } catch (err) {
+    console.log('eval failed');
+  }
+};
+
+StringEquation.prototype.calculate = function () {
+  try {
+    this.validateEquation();
+    this.sanitizeParenthesis();
+    this.sanitizeDoubleNegation();
+    this.testEval();
+    this.setDeepness();
+
+    while (this.deepness > 1) {
+      this.simplifyDeepest();
     }
 
-    this.answer = this.calculateOneLevelString(this.str);
-    console.log('this.answer', this.answer);
+    this.str = this.calculateFlatString(this.str);
+
+    return {result: this.str};
+  } catch (err) {
+    return {err: err.msg || 'Err'}
+  }
+};
+
+StringEquation.prototype.reset = function () {
+  this.str = '0';
+};
+
+StringEquation.prototype.appendEntry = function (char) {
+
+  // prevent starting with closing parenthesis
+  if (this.str === '0' && char === ')') {
+    return;
   }
 
+  // prevent multiple multiplication/division together
+  if (['*', '+', '/'].indexOf(this.str.slice(-1)) !== -1 && ['*', '/', '+'].indexOf(char) !== -1) {
+    return;
+  }
+
+  // prevent triple negation
+  if (this.str.slice(-2) === '--' && char === '-') {
+    return;
+  }
+
+  // prevent leading zero
+  if (this.str === '0' && char.match(/[0-9(]/)) {
+    this.str = '';
+  }
+
+  this.str += char;
 }
 
-StringEquation.prototype.isEquationValid = function (str) {
-  return (str.match(/\(/g) || []).length === (str.match(/\)/g) || []).length;
-}
+StringEquation.prototype.validateEquation = function () {
+  if ((this.str.match(/\(/g) || []).length !== (this.str.match(/\)/g) || []).length) {
+    throw {msg: 'Unbalanced parenthesis'}
+  }
+};
 
-StringEquation.prototype.sanitizeDoubleNegation = function (str) {
-  return str.replace(/--/g, '+');
-}
+StringEquation.prototype.sanitizeDoubleNegation = function () {
+  this.str = this.str.replace(/--/g, '+');
+};
 
-StringEquation.prototype.sanitizeParenthesis = function (str) {
-  return str.replace(/(\d)\(/g, function replacer(match, digit) {
+StringEquation.prototype.sanitizeParenthesis = function () {
+  this.str = this.str.replace(/(\d)\(/g, function replacer(match, digit) {
     return digit + '*(';
   });
-}
+};
 
 StringEquation.prototype.sanitizeDoubleOperators = function (str) {
   str = str.replace(/--/g, '+');
@@ -48,20 +84,20 @@ StringEquation.prototype.sanitizeDoubleOperators = function (str) {
   str = str.replace(/-\+/g, '-');
 
   return str;
-}
+};
 
-StringEquation.prototype.getEquationsFromLevel = function (targetLevel) {
+StringEquation.prototype.simplifyDeepest = function () {
   var level = 1;
   var start = 0;
   var end = 0;
   for (var i = 0; i < this.str.length; i++) {
     if (this.str[i] === '(') {
       level++;
-      if (level === targetLevel) {
+      if (level === this.deepness) {
         start = i;
       }
     } else if (this.str[i] === ')') {
-      if (level === targetLevel) {
+      if (level === this.deepness) {
         end = i;
         break;
       }
@@ -70,26 +106,27 @@ StringEquation.prototype.getEquationsFromLevel = function (targetLevel) {
   }
 
   var equation = this.str.slice(start + 1, end);
-  var result = this.calculateOneLevelString(equation);
+  var result = this.calculateFlatString(equation);
 
   this.str = this.str.substr(0, start)
     + result
     + this.str.substr(start + 2 + equation.length, this.str.length);
+
+  this.setDeepness();
 };
 
-StringEquation.prototype.getEquationParathensisMaxDeepness = function (str) {
+StringEquation.prototype.setDeepness = function () {
   var level = 1;
   var levelMax = 1;
-  for (var i = 0; i < str.length; i++) {
-    if (str[i] === '(') {
+  this.deepness = 1;
+  for (var i = 0; i < this.str.length; i++) {
+    if (this.str[i] === '(') {
       level++;
-      levelMax = level > levelMax ? level : levelMax;
-    } else if (str[i] === ')') {
+      this.deepness = level > levelMax ? level : levelMax;
+    } else if (this.str[i] === ')') {
       level--;
     }
   }
-
-  return levelMax;
 };
 
 StringEquation.prototype.calculateAndReplace = function (str, pattern, type) {
@@ -113,9 +150,9 @@ StringEquation.prototype.calculateAndReplace = function (str, pattern, type) {
   }
 
   return str;
-}
+};
 
-StringEquation.prototype.calculateOneLevelString = function (str) {
+StringEquation.prototype.calculateFlatString = function (str) {
   str = this.sanitizeDoubleOperators(str);
   str = this.calculateAndReplace(str, /[0-9.]+\*-?[0-9.]+/, '*');
   str = this.calculateAndReplace(str, /[0-9.]+\/[0-9.]+/, '/');
@@ -133,9 +170,9 @@ StringEquation.prototype.calculateOneLevelString = function (str) {
     var parts = match[0].split(typeMatch[0]);
     var result;
     if (typeMatch[0] === '+') {
-      result = sign === '-' ? - parseFloat(parts[0]) + parseFloat(parts[1]) :  parseFloat(parts[0]) + parseFloat(parts[1]);
+      result = sign === '-' ? -parseFloat(parts[0]) + parseFloat(parts[1]) : parseFloat(parts[0]) + parseFloat(parts[1]);
     } else {
-      result = sign === '-' ? - parseFloat(parts[0]) - parseFloat(parts[1]) : parseFloat(parts[0]) - parseFloat(parts[1]);
+      result = sign === '-' ? -parseFloat(parts[0]) - parseFloat(parts[1]) : parseFloat(parts[0]) - parseFloat(parts[1]);
     }
 
     str = str.substr(0, match.index)
@@ -155,4 +192,4 @@ StringEquation.prototype.calculateOneLevelString = function (str) {
   }
 
   return str;
-}
+};
