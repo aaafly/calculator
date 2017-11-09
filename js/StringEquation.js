@@ -1,5 +1,6 @@
 function StringEquation(str) {
   console.log('str', str)
+  this.answer = 0;
   this.str = this.sanitizeParenthesis(str);
   console.log('str', this.str)
   console.log('eval >>>>>> ', eval(this.str));
@@ -11,8 +12,8 @@ function StringEquation(str) {
     console.log('this.str', this.str);
   }
 
-  this.str = this.calculateOneLevelString(this.str);
-  console.log('this.str', this.str);
+  this.answer = this.calculateOneLevelString(this.str);
+  console.log('this.answer', this.answer);
 }
 
 StringEquation.prototype.sanitizeParenthesis = function (str) {
