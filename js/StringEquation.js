@@ -48,9 +48,14 @@ StringEquation.prototype.reset = function () {
 
 StringEquation.prototype.appendEntry = function (char) {
 
-  // prevent starting with closing parenthesis
-  if (this.str === '0' && char === ')') {
-    return;
+
+  // Prevent closing more parenthesis than opened.
+  if (char === ')') {
+    var openingCount = (this.str.match(/\(/g) || []).length;
+    var closingCount = (this.str.match(/\)/g) || []).length;
+    if (openingCount - closingCount < 1) {
+      return;
+    }
   }
 
   // prevent multiple multiplication/division together
