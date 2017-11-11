@@ -48,14 +48,16 @@ StringEquation.prototype.reset = function () {
 
 StringEquation.prototype.appendEntry = function (char) {
 
-
   // Prevent closing more parenthesis than opened.
   if (char === ')') {
-    var openingCount = (this.str.match(/\(/g) || []).length;
-    var closingCount = (this.str.match(/\)/g) || []).length;
-    if (openingCount - closingCount < 1) {
+    if ((this.str.match(/\(/g) || []).length - (this.str.match(/\)/g) || []).length < 1) {
       return;
     }
+  }
+
+  // Enforce a digit after a .
+  if (this.str.slice(-1) === '.' && !char.match(/\d/)) {
+      return;
   }
 
   // prevent multiple multiplication/division together
