@@ -38,6 +38,12 @@ InterfaceManager.prototype.reset = function () {
 };
 
 InterfaceManager.prototype.calculate = function () {
+
+  // Prevent submitting if equation unfinished
+  if (this.stringEquation.str.slice(-1).match(/[*+.(\-\/]/)) {
+    return;
+  }
+
   var res = this.stringEquation.calculate();
   if (res.err) {
     this.indicatorElem.html('Err. ' + res.err);
