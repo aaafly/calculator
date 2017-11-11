@@ -2,7 +2,11 @@ function StringEquation() {
   this.str = '0';
 }
 
+/**
+ * @returns {{result: string|undefined, err: string|undefined}}
+ */
 StringEquation.prototype.calculate = function () {
+
   try {
     this.testEval();
     this.validateEquation();
@@ -23,6 +27,10 @@ StringEquation.prototype.calculate = function () {
   }
 };
 
+/**
+ * @param {string} str
+ * @returns {string}
+ */
 StringEquation.prototype.calculateFlatString = function (str) {
 
   var firstPriorityPattern = /(-?[0-9.]+(?:[eE][+\-]?\d+)?)(\*|\/)([+\-]?[0-9.]+(?:[eE][+\-]?\d+)?)/;
@@ -46,6 +54,9 @@ StringEquation.prototype.reset = function () {
   this.str = '0';
 };
 
+/**
+ * @param {string} char
+ */
 StringEquation.prototype.appendEntry = function (char) {
 
   // Prevent closing more parenthesis than opened.
@@ -78,6 +89,9 @@ StringEquation.prototype.appendEntry = function (char) {
   this.str += char;
 };
 
+/**
+ * @throws {{msg: string}}
+ */
 StringEquation.prototype.validateEquation = function () {
   if ((this.str.match(/\(/g) || []).length !== (this.str.match(/\)/g) || []).length) {
     throw {msg: 'Unbalanced parenthesis'}
@@ -98,6 +112,10 @@ StringEquation.prototype.sanitize = function () {
   this.str = this.sanitizeDoubleSigns(this.str);
 };
 
+/**
+ * @param {string} str
+ * @returns {string}
+ */
 StringEquation.prototype.sanitizeDoubleSigns = function (str) {
   str = str.replace(/--/g, '+');
   str = str.replace(/\+-/g, '-');
@@ -107,15 +125,19 @@ StringEquation.prototype.sanitizeDoubleSigns = function (str) {
   return str;
 }
 
-StringEquation.prototype.isBalanced = function (code) {
-  var length = code.length;
+/**
+ * @param {string} str
+ * @returns {boolean}
+ */
+StringEquation.prototype.isBalanced = function (str) {
+  var length = str.length;
   var bracket = [];
   var matching = {
     ')': '('
   };
 
   for (var i = 0; i < length; i++) {
-    var char = code.charAt(i);
+    var char = str.charAt(i);
 
     switch (char) {
       case '(':
