@@ -1,27 +1,18 @@
 function StringEquation() {
   this.str = '0';
-  this.deepness = 1;
 }
-
-// Only for test purposes.
-StringEquation.prototype.testEval = function () {
-  try {
-    console.log('eval >>>>>> ', eval(this.str));
-  } catch (err) {
-    console.log('eval failed');
-  }
-};
 
 StringEquation.prototype.calculate = function () {
   try {
-    this.validateEquation();
-    this.sanitizeParenthesis();
-    this.str = this.sanitizeDoubleNegation(this.str);
     this.testEval();
-    this.setDeepness();
-
-    while (this.deepness > 1) {
-      this.simplifyDeepest();
+    this.validateEquation();
+    this.sanitize();
+    var _this = this;
+    var innerParenthesisPattern = /\(([e.+*\/\d\-]+)\)/;
+    while (this.str.match(innerParenthesisPattern)) {
+      this.str = this.str.replace(innerParenthesisPattern, function (match, str) {
+        return _this.calculateFlatString(str);
+      });
     }
 
     this.str = this.calculateFlatString(this.str);
@@ -30,6 +21,25 @@ StringEquation.prototype.calculate = function () {
   } catch (err) {
     return {err: err.msg || ' '}
   }
+};
+
+StringEquation.prototype.calculateFlatString = function (str) {
+
+  var firstPriorityPattern = /(-?[0-9.]+(?:[eE][+\-]?\d+)?)(\*|\/)([+\-]?[0-9.]+(?:[eE][+\-]?\d+)?)/;
+  while (str.match(firstPriorityPattern)) {
+    str = str.replace(firstPriorityPattern, function (match, a, operator, b) {
+      return operator === '/' ? parseFloat(a) / parseFloat(b) : parseFloat(a) * parseFloat(b);
+    });
+  }
+
+  var secondPriorityPattern = /(-?[0-9.]+(?:[eE][+\-]?\d+)?)(\+|-)([+\-]?[0-9.]+(?:[eE][+\-]?\d+)?)/;
+  while (str.match(secondPriorityPattern)) {
+    str = str.replace(secondPriorityPattern, function (match, a, operator, b) {
+      return operator === '+' ? parseFloat(a) + parseFloat(b) : parseFloat(a) - parseFloat(b);
+    });
+  }
+
+  return str;
 };
 
 StringEquation.prototype.reset = function () {
@@ -59,7 +69,7 @@ StringEquation.prototype.appendEntry = function (char) {
   }
 
   this.str += char;
-}
+};
 
 StringEquation.prototype.validateEquation = function () {
   if ((this.str.match(/\(/g) || []).length !== (this.str.match(/\)/g) || []).length) {
@@ -70,7 +80,26 @@ StringEquation.prototype.validateEquation = function () {
   }
 };
 
-// from web
+StringEquation.prototype.sanitize = function () {
+  this.str = this.sanitizeDoubleSigns(this.str);
+  this.str = this.str.replace(/([\d|)])\(/g, function replacer(match, digit) {
+    return digit + '*(';
+  });
+  this.str = this.str.replace(/\(([+\-]?[\d]+)\)/g, function replacer(match, digit) {
+    return digit;
+  });
+  this.str = this.sanitizeDoubleSigns(this.str);
+};
+
+StringEquation.prototype.sanitizeDoubleSigns = function (str) {
+  str = str.replace(/--/g, '+');
+  str = str.replace(/\+-/g, '-');
+  str = str.replace(/\+\+/g, '+');
+  str = str.replace(/-\+/g, '-');
+
+  return str;
+}
+
 StringEquation.prototype.isBalanced = function (code) {
   var length = code.length;
   var bracket = [];
@@ -92,158 +121,12 @@ StringEquation.prototype.isBalanced = function (code) {
   }
 
   return !bracket.length;
-}
-
-StringEquation.prototype.sanitizeDoubleNegation = function (str) {
-  return str.replace(/--/g, '+');
 };
 
-StringEquation.prototype.sanitizeParenthesis = function () {
-  this.str = this.str.replace(/([\d|)])\(/g, function replacer(match, digit) {
-    return digit + '*(';
-  });
-};
-
-StringEquation.prototype.sanitizeDoubleOperators = function (str) {
-  str = str.replace(/--/g, '+');
-  str = str.replace(/\+-/g, '-');
-  str = str.replace(/\+\+/g, '+');
-  str = str.replace(/-\+/g, '-');
-
-  return str;
-};
-
-StringEquation.prototype.simplifyDeepest = function () {
-  var level = 1;
-  var start = 0;
-  var end = 0;
-  for (var i = 0; i < this.str.length; i++) {
-    if (this.str[i] === '(') {
-      level++;
-      if (level === this.deepness) {
-        start = i;
-      }
-    } else if (this.str[i] === ')') {
-      if (level === this.deepness) {
-        end = i;
-        break;
-      }
-      level--;
-    }
+StringEquation.prototype.testEval = function () {
+  try {
+    console.info('*Eval ', eval(this.str));
+  } catch (err) {
+    console.warn('*Eval Err: ' + this.str);
   }
-
-  var equation = this.str.slice(start + 1, end);
-  var result = this.calculateFlatString(equation);
-
-  this.str = this.str.substr(0, start)
-    + result
-    + this.str.substr(start + 2 + equation.length, this.str.length);
-
-  this.setDeepness();
-};
-
-StringEquation.prototype.setDeepness = function () {
-  var level = 1;
-  var levelMax = 1;
-  this.deepness = 1;
-  for (var i = 0; i < this.str.length; i++) {
-    if (this.str[i] === '(') {
-      level++;
-      this.deepness = level > levelMax ? level : levelMax;
-    } else if (this.str[i] === ')') {
-      level--;
-    }
-  }
-};
-
-StringEquation.prototype.calculateAndReplace = function (str, pattern, type) {
-  var match = str.match(pattern);
-  while (match) {
-    var parts = match[0].split(type);
-    var result;
-    if (type === '*') {
-      result = parseFloat(parts[0]) * parseFloat(parts[1]);
-    } else if (type === '/') {
-      result = parseFloat(parts[0]) / parseFloat(parts[1]);
-    } else {
-      console.log('ERROR OPERATOR TYPE UNEXPECTED');
-    }
-
-    str = str.substr(0, match.index)
-      + result
-      + str.substr(match.index + match[0].length, str.length);
-
-    match = str.match(pattern);
-  }
-
-  return str;
-};
-
-StringEquation.prototype.calculateFlatString = function (str) {
-
-  // Clean up.
-  str = this.sanitizeDoubleOperators(str);
-
-  // Take care of all multiplications.
-  str = this.calculateAndReplace(str, /[0-9.]+\*-?[0-9.]+/, '*');
-  if (str.indexOf('e+') !== -1) {
-    throw {msg: 'Out of range'};
-  }
-
-  // Take care of all divisions.
-  str = this.calculateAndReplace(str, /[0-9.]+\/[0-9.]+/, '/');
-  if (str.indexOf('e+') !== -1) {
-    throw {msg: 'Out of range'};
-  }
-
-  // Clean up.
-  str = this.sanitizeDoubleNegation(str);
-  if (str[0] === '+') {
-    str = str.slice(1);
-  }
-
-
-  // Prepare for additions & subtractions.
-  var sign = str[0] === '-' ? '-' : '+';
-  if (sign === '-') {
-    str = str.slice(1);
-  }
-  var typeMatch = str.match(/[\-+]/);
-  var addPattern = /[0-9.]+\+[0-9.]+/;
-  var subPattern = /[0-9.]+-[0-9.]+/;
-
-  // If no addition or subtraction. re-assign sign.
-  if (!typeMatch && sign === '-') {
-    return '-' + str;
-  }
-
-  // Do additions & subtractions.
-  while (typeMatch) {
-    var pattern = typeMatch[0] === '+' ? addPattern : subPattern;
-    var match = str.match(pattern);
-    var parts = match[0].split(typeMatch[0]);
-    var result;
-    if (typeMatch[0] === '+') {
-      result = sign === '-' ? -parseFloat(parts[0]) + parseFloat(parts[1]) : parseFloat(parts[0]) + parseFloat(parts[1]);
-    } else {
-      result = sign === '-' ? -parseFloat(parts[0]) - parseFloat(parts[1]) : parseFloat(parts[0]) - parseFloat(parts[1]);
-    }
-
-    str = str.substr(0, match.index)
-      + result
-      + str.substr(match.index + match[0].length, str.length);
-
-    sign = str[0] === '-' ? '-' : '+';
-    if (sign === '-') {
-      str = str.slice(1);
-    }
-
-    typeMatch = str.match(/[\-+]/);
-
-    if (!typeMatch && sign === '-') {
-      str = '-' + str;
-    }
-  }
-
-  return str;
 };
