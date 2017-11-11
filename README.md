@@ -19,12 +19,9 @@ Nothing to install.
 Just put the files on a server for the links to work (css, js).
 
 Browse to: 
-- `http://votre_local_host` ou
-- `http://votre_local_host/index.html`
+- `http://localhost/index.html`
 
 ## Tests ##
 
-Nothing to install.
-
 Browse to: 
-- `http://votre_local_host/tests/index.html`
+- `http://localhost/tests/index.html`
